@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>SalesInvoiceJournalPost_PEP_Extension</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+[ExtensionOf(classStr(SalesInvoiceJournalPost))]
+final class SalesInvoiceJournalPost_PEP_Extension
+{
+ 
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>postJournalPost</Name>
+				<Source><![CDATA[
+	/// <summary>
+    /// postJournalPost
+    /// </summary>
+    public void postJournalPost()
+    {
+        next postJournalPost();
+
+        if(!this.isProforma())
+        {
+			
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>createInvoiceReporting_PEP</Name>
+				<Source><![CDATA[
+    public void createInvoiceReporting_PEP()
+    {
+        if (this.isProforma())
+            return;
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

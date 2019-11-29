@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>FormletterService_PEP_Extension</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+[ExtensionOf(classstr(FormletterService))]
+final class FormletterService_PEP_Extension
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>processJournal</Name>
+				<Source><![CDATA[
+    protected void processJournal(Printout _printout)
+    {
+        next processJournal(_printout);
+
+        if (formLetterJournalPostGTE)
+        {
+            //formLetterJournalPostGTE.createInvoiceReporting_PEP();
+            if (formLetterJournalPostGTE is SalesInvoiceJournalPost)
+            {
+                var salesInvoiceJournalPost = formLetterJournalPostGTE as SalesInvoiceJournalPost;
+                salesInvoiceJournalPost.createInvoiceReporting_PEP();
+            }
+            else
+            {
+                formLetterJournalPostGTE.createInvoiceReporting_PEP();
+            }
+		}
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

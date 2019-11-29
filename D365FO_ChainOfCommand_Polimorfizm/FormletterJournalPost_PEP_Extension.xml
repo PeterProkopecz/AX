@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>FormletterJournalPost_PEP_Extension</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+[ExtensionOf(classstr(FormletterJournalPost))]
+final class FormletterJournalPost_PEP_Extension
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>createInvoiceReporting_PEP</Name>
+				<Source><![CDATA[
+    public void createInvoiceReporting_PEP()
+    {
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
