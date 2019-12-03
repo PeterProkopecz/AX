@@ -1,0 +1,17 @@
+private PriceCur getPurchasePrice(ItemId _item, ReqQty _reqQty, TransDate _priceDate)
+{
+    PriceCur            purchPrice = 0;
+    InventTableModule   inventModule;
+    TransDate           priceDate  = _priceDate;
+    PriceDisc           priceDisc;
+    ;
+
+    if(jjeParameters.TradePriceByDueDate == NoYes::No)
+    {
+        priceDate = SystemDateGet();
+    }
+    inventModule = InventTableModule::find(_item, ModuleInventPurchSales::Purch);
+    [purchPrice] = PriceDisc::findItemPriceAgreement(inventModule.ModuleType, _item, inventDim, inventModule.UnitId, priceDate, _reqQty, vendTable.AccountNum, vendTable.Currency, '');
+
+    return purchPrice;
+}
