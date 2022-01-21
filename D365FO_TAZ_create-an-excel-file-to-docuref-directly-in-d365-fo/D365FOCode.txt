@@ -1,0 +1,129 @@
+using System.IO;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using OfficeOpenXml.Table;
+
+class ExcelExportToDocuRef_DV
+{
+    OfficeOpenXml.ExcelRange	cell,cells;
+    public static void main(Args _args)
+    {
+        ExcelExportToDocuRef_DV excelExport = new ExcelExportToDocuRef_DV();
+
+        excelExport.run();
+    }
+
+    public void run()
+    {
+        CustTable    custTable;
+        MemoryStream memoryStream = new MemoryStream();
+        
+        SalesTable   salesTable = SalesTable::find("012509");	
+
+        using (var package = new ExcelPackage(memoryStream))
+        {
+            int	currentRow = 1;
+            var	worksheets = package.get_Workbook().get_Worksheets();
+            var	CustTableWorksheet = worksheets.Add("Export");
+            cells = CustTableWorksheet.get_Cells();
+
+            this.insertCel(currentRow,1,"@SYS7149");  // AccountNum
+            this.insertCel(currentRow,2,"@SYS7572");  // CurrencyCode
+            this.insertCel(currentRow,3,"@SYS23784"); // SalesGroup
+            this.insertCel(currentRow,4,"@SYS27703"); // DlvTerm
+   
+            while select firstonly10 AccountNum, Currency, SalesGroup, DlvTerm
+                from custTable
+            {
+                currentRow ++;
+
+                this.insertCel(currentRow,1,custTable.AccountNum);		 // AccountNum
+                this.insertCel(currentRow,2,custTable.Currency);		  // CurrencyCode
+                this.insertCel(currentRow,3,custTable.SalesGroup);		// SalesGroup
+                this.insertCel(currentRow,4,custTable.DlvTerm);			   // SalesGroup
+            }
+
+            package.SaveAs(memoryStream);
+            str fileName = "CustomersSaveToDocuRef_" + date2Str(DateTimeUtil::getToday(DateTimeUtil::getUserPreferredTimeZone()), 321, DateDay::Digits2, DateSeparator::Hyphen, DateMonth::Digits2, DateSeparator::Hyphen, DateYear::Digits4) + "_" + time2Str(DateTimeUtil::getTimeNow(DateTimeUtil::getUserPreferredTimeZone()), TimeSeparator::Colon, TimeSeparator::Colon) + ".xlsx";
+			
+            this.createAttachment(salesTable.TableId,salesTable.RecId,memoryStream,fileName);
+        }
+    }
+
+    public void insertCel(int _row, int _col, anytype _value)
+    {
+        cell  = null;
+        cell  = cells.get_Item(_row, _col);
+        cell.set_Value(_value.ToString());
+    }
+
+    public void createAttachment(TableId _refTableId, RefRecId _refRecId, System.IO.MemoryStream _result, FileName _fileName)
+    {
+
+        DocuRef	  docuRefTable;
+        DocuValue docuValueTable;
+        Microsoft.Dynamics.AX.Framework.FileManagement.DocumentLocation			location;
+        Microsoft.Dynamics.AX.Framework.FileManagement.IDocumentStorageProvider storageProvider;
+
+        System.IO.Stream fileStream;
+
+        FileIOPermission permission  = new FileIOPermission("", 'r');
+        permission.assert();
+        InteropPermission interopPerm = new InteropPermission(InteropKind::ClrInterop);
+        interopPerm.assert();
+        DocuType fileType = DocuType::find(DocuType::typeFile());
+
+        storageProvider = Docu::GetStorageProvider(fileType, true, curUserId());
+
+        if (_refRecId > 0)
+        {
+            guid      fileId = newGuid();
+            container readcon = Binary::constructFromMemoryStream(_result).getContainer();
+
+            ttsBegin;
+            
+            docuValueTable.clear();
+            docuValueTable.FileId           = fileId;
+            docuValueTable.FileType         = "xlsx";
+            docuValueTable.FileName         = _fileName;
+            docuValueTable.Name             = _fileName;
+            docuValueTable.OriginalFileName = _fileName;
+            docuValueTable.File	            = readcon;
+
+            fileStream = Binary::constructFromContainer(docuValueTable.File).getMemoryStream();
+            location   = storageProvider.SaveFile(docuValueTable.FileId, storageProvider.GenerateUniqueName(docuValueTable.OriginalFileName), System.Web.MimeMapping::GetMimeMapping(docuValueTable.OriginalFileName), fileStream);
+
+            if (location.NavigationUri)
+            {
+                docuValueTable.Path = location.get_NavigationUri().ToString();
+            }
+
+            if (location.AccessUri)
+            {
+                docuValueTable.AccessInformation = location.get_AccessUri().ToString();
+            }
+
+            docuValueTable.StorageProviderId = storageProvider.ProviderId;
+            docuValueTable.insert();
+
+            if (docuValueTable.RecId)
+            {
+                docuRefTable.clear();
+                docuRefTable.RefRecId     = _refRecid;
+                docuRefTable.RefTableId   = _refTableId;
+                docuRefTable.RefCompanyId = curext();
+                docuRefTable.Name         = "Attachment";
+                docuRefTable.Notes        = _fileName;
+                docuRefTable.TypeId       = 'File';
+                docuRefTable.ValueRecId   = docuValueTable.RecId;
+    
+                docuRefTable.insert();
+
+                info("The attachment is successfully uploaded!");
+
+            }
+            ttsCommit;
+        }
+    }
+
+}
