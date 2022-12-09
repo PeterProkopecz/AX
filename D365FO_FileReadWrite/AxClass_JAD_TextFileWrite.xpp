@@ -1,0 +1,19 @@
+﻿class JAD_TextFileWrite
+{
+    public static void main(Args _args)
+    {
+
+        Filename fileName = 'Filename.Txt';
+        AsciiStreamIo asciiIo = AsciiStreamIo::constructForWrite();
+
+        asciiIo.outRecordDelimiter("\r\n");
+        asciiIo.outFieldDelimiter(";");
+
+        asciiIo.write('Line 1');
+        asciiIo.write('Line 2');
+        File::SendFileToUser(asciiIo.getStream(),'asciiFile.txt');
+
+
+    }
+
+}

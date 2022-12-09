@@ -1,0 +1,38 @@
+﻿class JAD_TextFileRead
+{
+    /// <summary>
+    /// Runs the class with the specified arguments.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+        FileUploadTemporaryStorageResult    uploadFileResult = File::GetFileFromUser();
+        System.IO.Stream                    readStream = File::UseFileFromURL(uploadFileResult.getDownloadUrl());
+        AsciiStreamIo                       inFile = AsciiStreamIo::constructForRead(readStream);
+
+        container               readCon;
+        str                     recordRead;
+        int                     nRead;
+
+        inFile.inFieldDelimiter("\r\n");
+        inFile.inRecordDelimiter("\r\n");
+
+        if (!inFile)
+        {
+            //FileName = uploadFileResult.getFileName();
+            Error('Cannot open file. Import failed.');
+        }
+        else
+        {
+            readCon = inFile.read();
+            while (inFile.status() == IO_Status::OK)
+            {
+                recordRead = conPeek(readCon, 1);
+                info(recordRead);
+                readCon = inFile.read();
+                nRead++;
+            }
+        }
+    }
+
+}
